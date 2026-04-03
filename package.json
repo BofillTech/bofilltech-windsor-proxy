@@ -1,0 +1,6 @@
+{
+  "name": "bofilltech-windsor-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Windsor.ai API proxy for BofillTech dashboards"
+}
