@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/windsor.js": {
+      "maxDuration": 30
+    }
+  }
+}
