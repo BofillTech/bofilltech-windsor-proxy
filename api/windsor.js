@@ -20,9 +20,9 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Missing required params: connector, fields' });
   }
 
+  // Build Windsor.ai REST API URL — connector goes in the path
   const params = new URLSearchParams({
     api_key: apiKey,
-    connector: connector,
     fields: fields,
   });
 
@@ -31,13 +31,13 @@ module.exports = async function handler(req, res) {
   if (date_from) params.append('date_from', date_from);
   if (date_to) params.append('date_to', date_to);
 
-  const windsorUrl = `https://connectors.windsor.ai/all?${params.toString()}`;
+  const windsorUrl = `https://connectors.windsor.ai/${connector}?${params.toString()}`;
 
   try {
     const response = await fetch(windsorUrl);
     if (!response.ok) {
       const text = await response.text();
-      return res.status(response.status).json({ error: 'Windsor API error', detail: text.substring(0, 500) });
+      return res.status(response.status).json({ error: 'Windsor API error', status: response.status, detail: text.substring(0, 500) });
     }
     const data = await response.json();
     return res.status(200).json(data);
