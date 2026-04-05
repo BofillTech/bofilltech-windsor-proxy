@@ -1,43 +1,38 @@
 module.exports = async function handler(req, res) {
-  const origin = req.headers.origin || '';
-  const allowed = ['https://bofilltech.com', 'https://www.bofilltech.com', 'http://localhost:3000'];
-  const corsOrigin = allowed.includes(origin) ? origin : 'https://bofilltech.com';
-
-  res.setHeader('Access-Control-Allow-Origin', corsOrigin);
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
-
+ 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
-
+ 
   const apiKey = process.env.WINDSOR_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'WINDSOR_API_KEY not configured' });
-
+ 
   const { connector, fields, accounts, date_preset, date_from, date_to } = req.query;
-
+ 
   if (!connector || !fields) {
     return res.status(400).json({ error: 'Missing required params: connector, fields' });
   }
-
-  // Build Windsor.ai REST API URL — connector goes in the path
+ 
   const params = new URLSearchParams({
     api_key: apiKey,
     fields: fields,
   });
-
+ 
   if (accounts) params.append('accounts', accounts);
   if (date_preset) params.append('date_preset', date_preset);
   if (date_from) params.append('date_from', date_from);
   if (date_to) params.append('date_to', date_to);
-
+ 
   const windsorUrl = `https://connectors.windsor.ai/${connector}?${params.toString()}`;
-
+ 
   try {
     const response = await fetch(windsorUrl);
     if (!response.ok) {
       const text = await response.text();
-      return res.status(response.status).json({ error: 'Windsor API error', status: response.status, detail: text.substring(0, 500) });
+      return res.status(response.status).json({ error: 'Windsor API error', detail: text.substring(0, 500) });
     }
     const data = await response.json();
     return res.status(200).json(data);
